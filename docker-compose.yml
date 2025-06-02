@@ -1,90 +1,39 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: luthiers-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: luthiers_shop
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+  app:
+    build: .
     ports:
-      - "5432:5432"
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-luthiers_shop}?schema=public
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - PORT=${PORT:-3000}
+      - NODE_ENV=${NODE_ENV:-development}
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npm run prisma:migrate && npm run prisma:seed && npm run start:dev"
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-luthiers_shop}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - luthiers-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # NestJS Application (Development)
-  app-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: luthiers-app-dev
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: "postgresql://postgres:password@postgres:5432/luthiers_shop?schema=public"
-      JWT_SECRET: "your-super-secret-jwt-key-change-in-production"
-      JWT_EXPIRES_IN: "7d"
-      PORT: 3000
-      NODE_ENV: development
-    ports:
-      - "3000:3000"
-    volumes:
-      # Mount source code for hot reload, but exclude problematic directories
-      - ./src:/app/src
-      - ./prisma:/app/prisma
-      - ./.env:/app/.env
-      - ./package.json:/app/package.json
-      - ./package-lock.json:/app/package-lock.json
-      - ./tsconfig.json:/app/tsconfig.json
-      - ./nest-cli.json:/app/nest-cli.json
-      # Use named volumes for these directories to avoid conflicts
-      - node_modules_volume:/app/node_modules
-      - dist_volume:/app/dist
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - luthiers-network
-    command: sh -c "npx prisma migrate deploy && npm run start:dev"
-
-  # NestJS Application (Production)
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: luthiers-app
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: "postgresql://postgres:password@postgres:5432/luthiers_shop?schema=public"
-      JWT_SECRET: "your-super-secret-jwt-key-change-in-production"
-      JWT_EXPIRES_IN: "7d"
-      PORT: 3000
-      NODE_ENV: production
-    ports:
-      - "3001:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - luthiers-network
-    command: sh -c "npx prisma migrate deploy && npm run start:prod"
-    profiles:
-      - production
-
 volumes:
   postgres_data:
-  node_modules_volume:
-  dist_volume:
-
-networks:
-  luthiers-network:
-    driver: bridge
