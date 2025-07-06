@@ -1,10 +1,11 @@
 {
-  "name": "luthiers-shop",
+  "name": "e3AudioApi",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+"packageManager": "pnpm@9.6.0"
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
