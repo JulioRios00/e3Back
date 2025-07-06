@@ -7,8 +7,9 @@
   "license": "UNLICENSED",
   "packageManager": "pnpm@9.6.0",
   "scripts": {
-    "build": "nest build",
+    "build": "pnpm prisma:generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "postbuild": "cp ./prisma/schema.prisma ./dist/",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
