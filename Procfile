@@ -1,2 +1,2 @@
-release: npm run prisma:migrate
-web: npm run start:prod
+release: pnpm run prisma:migrate
+web: pnpm run start:prod
