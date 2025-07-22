@@ -369,4 +369,40 @@ pnpm run docker:up
 6. **Add form validation** matching backend DTOs
 7. **Test all endpoints** with different user roles
 
+---
+
+## 📊 Error Monitoring & Logging
+
+### Sentry Integration (Free Tier Available)
+This API includes **Sentry** integration for real-time error monitoring:
+
+- **Free Tier**: 5,000 errors/month, 30-day history
+- **Features**: Real-time error tracking, stack traces, performance monitoring
+- **Setup**: Already integrated, just add your `SENTRY_DSN` to environment variables
+
+#### Environment Setup
+Add to your `.env` file:
+```bash
+SENTRY_DSN="https://your-dsn@sentry.io/project-id"
+NODE_ENV=production  # or development
+```
+
+#### Get Your Sentry DSN
+1. Go to [sentry.io](https://sentry.io) and create a free account
+2. Create a new **Node.js** project
+3. Copy your DSN from the project settings
+4. Add it to your `.env` file
+
+#### Error Tracking Features
+- **Automatic error capture** for unhandled exceptions
+- **Registration errors** with user context (email, name)
+- **Authentication failures** tracking
+- **Performance monitoring** for API endpoints
+- **Real-time alerting** via email/Slack
+
+### Alternative Free Logging Services
+- **LogRocket** (1,000 sessions/month)
+- **Rollbar** (5,000 errors/month) 
+- **Bugsnag** (2,000 errors/month)
+
 This mapping provides everything needed to integrate your frontend application with the E3Audio API backend service.

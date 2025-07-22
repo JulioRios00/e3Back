@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
+import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class AuthService {
@@ -53,7 +54,24 @@ export class AuthService {
         access_token: this.jwtService.sign({ sub: user.id, email: user.email, role: user.role }),
       };
     } catch (error) {
+      // Log to console for local development
       console.error('[Register] Error during registration:', error);
+      
+      // Send to Sentry for monitoring
+      Sentry.captureException(error, {
+        tags: {
+          operation: 'register',
+          email: registerDto.email,
+        },
+        extra: {
+          registerData: {
+            email: registerDto.email,
+            firstName: registerDto.firstName,
+            lastName: registerDto.lastName,
+          },
+        },
+      });
+      
       throw error;
     }
   }
