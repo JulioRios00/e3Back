@@ -23,7 +23,25 @@ async function bootstrap() {
     transform: true,
   }));
 
-  app.enableCors();
+  // Enhanced CORS configuration for mobile apps
+  app.enableCors({
+    origin: true, // Allow all origins for development/mobile apps
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+      'Access-Control-Allow-Origin',
+      'Access-Control-Allow-Headers',
+      'Access-Control-Allow-Methods',
+    ],
+    exposedHeaders: ['Authorization'],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  });
   
   const port = process.env.PORT || 3000;
   await app.listen(port);

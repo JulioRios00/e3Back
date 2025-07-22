@@ -12,6 +12,18 @@ export class TestController {
       timestamp: new Date().toISOString(),
       version: process.env.HEROKU_SLUG_COMMIT || 'unknown',
       sentry: !!process.env.SENTRY_DSN ? 'enabled' : 'disabled',
+      cors: 'enabled',
+    };
+  }
+
+  @Post('mobile-connectivity')
+  testMobileConnectivity(@Body() data: any) {
+    return {
+      status: 'mobile_connection_successful',
+      message: 'Mobile app can successfully connect to the API',
+      receivedData: data,
+      timestamp: new Date().toISOString(),
+      cors: 'working',
     };
   }
   

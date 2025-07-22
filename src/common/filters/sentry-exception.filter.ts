@@ -33,12 +33,15 @@ export class SentryExceptionFilter implements ExceptionFilter {
           endpoint: request.url,
           method: request.method,
           statusCode: status,
+          userAgent: request.headers['user-agent'],
+          origin: request.headers.origin,
         },
         extra: {
           headers: request.headers,
           body: request.body,
           params: request.params,
           query: request.query,
+          ip: request.ip,
         },
         user: {
           id: request.user?.id,
@@ -47,10 +50,13 @@ export class SentryExceptionFilter implements ExceptionFilter {
       });
     }
 
-    // Console log for development
-    if (process.env.NODE_ENV === 'development') {
-      console.error(`[${request.method}] ${request.url} - ${status}:`, exception);
-    }
+    // Console log for development and mobile debugging
+    console.error(`[${request.method}] ${request.url} - ${status}:`, {
+      error: exception instanceof Error ? exception.message : 'Unknown error',
+      userAgent: request.headers['user-agent'],
+      origin: request.headers.origin,
+      ip: request.ip,
+    });
 
     response.status(status).json({
       statusCode: status,
