@@ -13,43 +13,49 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { email, password, firstName, lastName, phone, birthday } = registerDto;
+    try {
+      const { email, password, firstName, lastName, phone, birthday } = registerDto;
 
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email },
+      });
 
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      if (existingUser) {
+        console.error(`[Register] Conflict: User with email ${email} already exists`);
+        throw new ConflictException('User with this email already exists');
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      const user = await this.prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          firstName,
+          lastName,
+          phone,
+          birthday: new Date(birthday),
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          birthday: true,
+          role: true,
+          createdAt: true,
+        },
+      });
+
+      return {
+        user,
+        access_token: this.jwtService.sign({ sub: user.id, email: user.email, role: user.role }),
+      };
+    } catch (error) {
+      console.error('[Register] Error during registration:', error);
+      throw error;
     }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        phone,
-        birthday: new Date(birthday),
-      },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        birthday: true,
-        role: true,
-        createdAt: true,
-      },
-    });
-
-    return {
-      user,
-      access_token: this.jwtService.sign({ sub: user.id, email: user.email, role: user.role }),
-    };
   }
 
   async login(loginDto: LoginDto) {
