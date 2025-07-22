@@ -1,11 +1,13 @@
 # E3Audio API - Endpoints Mapping for Frontend Integration
 
 ## Base Information
-- **API Base URL**: `http://localhost:3000` (development)
+- **API Base URL (Development)**: `http://localhost:3000`
+- **API Base URL (Production)**: `https://e3-api-d64fcc5bd009.herokuapp.com`
 - **API Name**: E3Audio API
 - **Framework**: NestJS with TypeScript
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: JWT Bearer Token
+- **Hosting**: Heroku
 
 ## Global Configuration
 - **CORS**: Enabled

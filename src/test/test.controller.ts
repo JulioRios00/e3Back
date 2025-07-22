@@ -4,6 +4,17 @@ import * as Sentry from '@sentry/node';
 @Controller('test')
 export class TestController {
   
+  @Get('health')
+  healthCheck() {
+    return {
+      status: 'healthy',
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      version: process.env.HEROKU_SLUG_COMMIT || 'unknown',
+      sentry: !!process.env.SENTRY_DSN ? 'enabled' : 'disabled',
+    };
+  }
+  
   @Get('sentry')
   testSentry() {
     // Test Sentry error capturing
@@ -12,6 +23,7 @@ export class TestController {
     return {
       message: 'Sentry test message sent! Check your Sentry dashboard.',
       timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
     };
   }
 
@@ -30,6 +42,7 @@ export class TestController {
           message: 'This was a slow endpoint (2 seconds)',
           data,
           timestamp: new Date().toISOString(),
+          environment: process.env.NODE_ENV || 'development',
         });
       }, 2000);
     });
