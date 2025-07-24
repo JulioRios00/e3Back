@@ -26,6 +26,32 @@ export class TestController {
       cors: 'working',
     };
   }
+
+  @Post('debug-registration')
+  debugRegistration(@Body() data: any) {
+    // This endpoint helps debug mobile registration issues
+    console.log('🔍 Debug registration received:', {
+      data,
+      headers: data.headers || 'no headers info',
+      timestamp: new Date().toISOString(),
+    });
+
+    return {
+      status: 'debug_registration_received',
+      message: 'Data received successfully - check server logs',
+      receivedData: data,
+      dataValidation: {
+        hasEmail: !!data.email,
+        hasPassword: !!data.password,
+        hasFirstName: !!data.firstName,
+        hasLastName: !!data.lastName,
+        hasBirthday: !!data.birthday,
+        emailFormat: data.email ? /\S+@\S+\.\S+/.test(data.email) : false,
+        passwordLength: data.password ? data.password.length : 0,
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
   
   @Get('sentry')
   testSentry() {
