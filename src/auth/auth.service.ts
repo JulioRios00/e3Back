@@ -28,6 +28,10 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(password, 12);
 
+      // For demo purposes, make first user an admin
+      const userCount = await this.prisma.user.count();
+      const role = userCount === 0 ? 'ADMIN' : 'USER';
+
       const user = await this.prisma.user.create({
         data: {
           email,
@@ -36,6 +40,7 @@ export class AuthService {
           lastName,
           phone,
           birthday: new Date(birthday),
+          role, // Set role based on user count
         },
         select: {
           id: true,

@@ -1,0 +1,430 @@
+{
+  "info": {
+    "name": "E3Audio API",
+    "description": "Complete API collection for E3Audio backend service with authentication, admin features, and testing endpoints",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url_dev",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "base_url_prod",
+      "value": "https://e3-api-d64fcc5bd009.herokuapp.com",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('jwt_token', response.access_token);",
+                  "    pm.test('Registration successful', function () {",
+                  "        pm.expect(response.access_token).to.be.a('string');",
+                  "        pm.expect(response.user.email).to.be.a('string');",
+                  "    });",
+                  "} else if (pm.response.code === 409) {",
+                  "    pm.test('Email already exists', function () {",
+                  "        pm.expect(pm.response.json().message).to.include('already exists');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test.user@example.com\",\n  \"password\": \"testpassword123\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"phone\": \"1234567890\",\n  \"birthday\": \"1990-01-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_prod}}/auth/register",
+              "host": ["{{base_url_prod}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user account. Returns user data and JWT token."
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('jwt_token', response.access_token);",
+                  "    pm.test('Login successful', function () {",
+                  "        pm.expect(response.access_token).to.be.a('string');",
+                  "        pm.expect(response.user.email).to.be.a('string');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test.user@example.com\",\n  \"password\": \"testpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_prod}}/auth/login",
+              "host": ["{{base_url_prod}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate user and get JWT token."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url_prod}}/auth/profile",
+              "host": ["{{base_url_prod}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Get current authenticated user's profile. Requires JWT token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👨‍💼 Admin Endpoints",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url_prod}}/admin/users",
+              "host": ["{{base_url_prod}}"],
+              "path": ["admin", "users"]
+            },
+            "description": "Get all users in the system. Requires admin role."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url_prod}}/admin/users/:id",
+              "host": ["{{base_url_prod}}"],
+              "path": ["admin", "users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user_id_here"
+                }
+              ]
+            },
+            "description": "Get specific user by ID. Requires admin role."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Today's Birthdays",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url_prod}}/admin/birthdays/today",
+              "host": ["{{base_url_prod}}"],
+              "path": ["admin", "birthdays", "today"]
+            },
+            "description": "Get users with birthdays today. Requires admin role."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Upcoming Birthdays",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url_prod}}/admin/birthdays/upcoming?days=7",
+              "host": ["{{base_url_prod}}"],
+              "path": ["admin", "birthdays", "upcoming"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "7",
+                  "description": "Number of days to look ahead (default: 7)"
+                }
+              ]
+            },
+            "description": "Get users with upcoming birthdays. Requires admin role."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧪 Testing & Debug",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_prod}}/test/health",
+              "host": ["{{base_url_prod}}"],
+              "path": ["test", "health"]
+            },
+            "description": "Check API health status and configuration."
+          },
+          "response": []
+        },
+        {
+          "name": "Test Sentry",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_prod}}/test/sentry",
+              "host": ["{{base_url_prod}}"],
+              "path": ["test", "sentry"]
+            },
+            "description": "Test Sentry error monitoring integration."
+          },
+          "response": []
+        },
+        {
+          "name": "Test Error Capture",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_prod}}/test/error",
+              "host": ["{{base_url_prod}}"],
+              "path": ["test", "error"]
+            },
+            "description": "Test error capture and Sentry logging."
+          },
+          "response": []
+        },
+        {
+          "name": "Test Slow Endpoint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"test\": \"performance monitoring\",\n  \"timestamp\": \"{{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_prod}}/test/slow",
+              "host": ["{{base_url_prod}}"],
+              "path": ["test", "slow"]
+            },
+            "description": "Test slow endpoint for performance monitoring (2 second delay)."
+          },
+          "response": []
+        },
+        {
+          "name": "Mobile Connectivity Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platform\": \"mobile\",\n  \"test\": \"connectivity\",\n  \"timestamp\": \"{{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_prod}}/test/mobile-connectivity",
+              "host": ["{{base_url_prod}}"],
+              "path": ["test", "mobile-connectivity"]
+            },
+            "description": "Test mobile app connectivity and CORS configuration."
+          },
+          "response": []
+        },
+        {
+          "name": "Debug Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"debug.test@example.com\",\n  \"password\": \"testpassword123\",\n  \"firstName\": \"Debug\",\n  \"lastName\": \"Test\",\n  \"phone\": \"1234567890\",\n  \"birthday\": \"1990-01-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_prod}}/test/debug-registration",
+              "host": ["{{base_url_prod}}"],
+              "path": ["test", "debug-registration"]
+            },
+            "description": "Debug registration data validation and processing."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🌐 Environment Examples",
+      "item": [
+        {
+          "name": "🏠 Local Development",
+          "item": [
+            {
+              "name": "Register (Local)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"local.test@example.com\",\n  \"password\": \"testpassword123\",\n  \"firstName\": \"Local\",\n  \"lastName\": \"Test\",\n  \"phone\": \"1234567890\",\n  \"birthday\": \"1990-01-01\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url_dev}}/auth/register",
+                  "host": ["{{base_url_dev}}"],
+                  "path": ["auth", "register"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Health Check (Local)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url_dev}}/test/health",
+                  "host": ["{{base_url_dev}}"],
+                  "path": ["test", "health"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set dynamic timestamp",
+          "pm.globals.set('timestamp', new Date().toISOString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test for response time",
+          "pm.test('Response time is less than 5000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Log response for debugging",
+          "console.log('Response status:', pm.response.code);",
+          "console.log('Response time:', pm.response.responseTime + 'ms');"
+        ]
+      }
+    }
+  ]
+}

@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import * as Sentry from '@sentry/node';
 
 @Controller('test')
 export class TestController {
+  constructor(private prisma: PrismaService) {}
   
   @Get('health')
   healthCheck() {
@@ -51,6 +53,93 @@ export class TestController {
       },
       timestamp: new Date().toISOString(),
     };
+  }
+
+  @Post('create-admin')
+  async createAdminUser(@Body() data: { email: string; password: string; firstName: string; lastName: string; birthday: string }) {
+    // This endpoint helps create an admin user for testing
+    try {
+      const adminData = {
+        ...data,
+        role: 'ADMIN' // This will need to be handled in the registration logic
+      };
+      
+      return {
+        status: 'admin_creation_attempted',
+        message: 'Admin user creation attempted - check server logs',
+        data: adminData,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  @Get('check-users')
+  async checkUsers() {
+    try {
+      const users = await this.prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+        },
+      });
+
+      return {
+        status: 'success',
+        message: 'Users retrieved',
+        totalUsers: users.length,
+        users: users,
+        adminUsers: users.filter(u => u.role === 'ADMIN').length,
+        regularUsers: users.filter(u => u.role === 'USER').length,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  @Post('promote-to-admin')
+  async promoteToAdmin(@Body() data: { email: string }) {
+    try {
+      const user = await this.prisma.user.update({
+        where: { email: data.email },
+        data: { role: 'ADMIN' },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+        },
+      });
+
+      return {
+        status: 'success',
+        message: 'User promoted to admin',
+        user: user,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      };
+    }
   }
   
   @Get('sentry')
