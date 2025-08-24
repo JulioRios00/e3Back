@@ -23,9 +23,14 @@ async function bootstrap() {
     transform: true,
   }));
 
-  // Enhanced CORS configuration for mobile apps
+  // Enhanced CORS configuration for frontend and mobile apps
   app.enableCors({
-    origin: true, // Allow all origins for development/mobile apps
+    origin: [
+      'http://localhost:3000',      // Local development
+      'http://localhost:3001',      // Alternative local port
+      'http://localhost:4200',      // Angular default port
+      'https://e3-audio-uoc9.vercel.app', // Production frontend
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
