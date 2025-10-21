@@ -45,7 +45,7 @@ async function bootstrap() {
     exposedHeaders: ['Authorization'],
     credentials: true,
     preflightContinue: false,
-    optionsSuccessStatus: 204,
+    optionsSuccessStatus: 200,
   });
   
   const port = process.env.PORT || 3000;
