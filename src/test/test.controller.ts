@@ -7,12 +7,20 @@ export class TestController {
   constructor(private prisma: PrismaService) {}
   
   @Get('health')
-  healthCheck() {
+  async healthCheck() {
+    // Ping DB to keep Neon alive on every health check
+    let dbStatus = 'connected';
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+    } catch {
+      dbStatus = 'disconnected';
+    }
+
     return {
-      status: 'healthy',
+      status: dbStatus === 'connected' ? 'healthy' : 'degraded',
+      database: dbStatus,
       environment: process.env.NODE_ENV || 'development',
       timestamp: new Date().toISOString(),
-      version: process.env.HEROKU_SLUG_COMMIT || 'unknown',
       sentry: !!process.env.SENTRY_DSN ? 'enabled' : 'disabled',
       cors: 'enabled',
     };

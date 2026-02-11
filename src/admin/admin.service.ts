@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { async } from 'rxjs';
 
 @Injectable()
 export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async getAllUsers() {
@@ -98,6 +99,16 @@ export class AdminService {
 
       return thisYearBirthday >= today && thisYearBirthday <= futureDate;
     });
+  }
+
+  @Cron('*/4 * * * *')
+  async keepAlive() {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      this.logger.log('Keep-alive: DB ping OK');
+    } catch (error) {
+      this.logger.error('Keep-alive: DB ping failed', error.message);
+    }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
